@@ -1,6 +1,6 @@
 module.exports = {
   app_config: {
-    app_url: process.env.NODE_ENV !== "production" ? "http://localhost:8001" : "",
+    app_url: process.env.APP_URL || "http://localhost:8001",
   },
   rabbit_mq_config: {
     protocol: "amqp",
@@ -12,6 +12,6 @@ module.exports = {
   },
   redis_config: {
     port: process.env.REDIS_PORT || 6379,
-    host: process.env.REDIS_HOST || "",
+    host: process.env.REDIS_HOST || "redis-store",
   },
 };

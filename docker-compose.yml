@@ -1,0 +1,54 @@
+version: "3"
+services:
+  db:
+    container_name: mongo
+    image: mongo
+    volumes:
+      - ./data:/data/db
+    ports:
+      - "27017:27017"
+  myrabbitmq:
+    image: "rabbitmq:3-management"
+    hostname: my-rabbit
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+  management:
+    build: ./MANAGEMENT-SERVICE
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./MANAGEMENT-SERVICE:/nodeapp
+    depends_on:
+      - db
+      - myrabbitmq
+    environment:
+      - DB=mongodb://db:27017/managementservice
+      - RABBITMQ_HOST=myrabbitmq
+      - RABBITMQ_PORT=5672
+      - REDIRECTION_APP_URL=http://localhost:8001
+      - APP_PORT=3000
+    restart: on-failure
+  redirection:
+    build: ./REDIRECTION-SERVICE
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./REDIRECTION-SERVICE:/nodeapp
+    depends_on:
+      - myrabbitmq
+      - redis-store
+    environment:
+      - RABBITMQ_HOST=myrabbitmq
+      - RABBITMQ_PORT=5672
+      - REDIS_HOST=redis-store
+      - REDIS_PORT=6379
+      - APP_URL=http://localhost:8001/
+      - APP_PORT=3000
+    restart: on-failure
+  redis-store:
+    image: "redis:6"
+    ports:
+      - "6379:6379"
+    expose:
+      - 6379

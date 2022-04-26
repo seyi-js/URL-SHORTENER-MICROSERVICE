@@ -1,13 +1,9 @@
 module.exports = {
   db_config: {
-    db:
-      process.env.NODE_ENV !== "production"
-        ? "mongodb://localhost:27017/managementservice"
-        : "",
+    db: process.env.DB || "mongodb://localhost:27017/managementservice",
   },
   app_config: {
-    redirection_url:
-      process.env.NODE_ENV !== "production" ? "http://localhost:8001" : "",
+    redirection_url: process.env.REDIRECTION_APP_URL || "http://localhost:8001",
   },
   rabbit_mq_config: {
     protocol: "amqp",
