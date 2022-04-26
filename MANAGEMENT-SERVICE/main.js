@@ -3,7 +3,6 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 const morgan = require("morgan");
 require("./config/db_config");
-const crypto = require("crypto");
 const { UrlModel } = require("./model");
 const Hashids = require("hashids/cjs");
 const hashids = new Hashids("hello world", 5);
@@ -27,15 +26,20 @@ app.post("/", async (req, res) => {
     });
 
     await newUrl.save();
-    console.log(newUrl._id);
     const hash = hashids.encodeHex(newUrl._id.toString());
-    const shortUrl = `${require("./config/config").app_config.app_url}/${hash}`;
+    const shortUrl = `${
+      require("./config/config").app_config.redirection_url
+    }/${hash}`;
 
     newUrl.shortUrl = shortUrl;
     newUrl.save();
 
     //publish to queue
-    await publishToQueue(newUrl, "create-url");
+    const data = {
+      newUrl,
+      hash,
+    };
+    await publishToQueue(data, "create-url");
 
     res.status(200).json(newUrl);
   } catch (error) {
@@ -49,6 +53,10 @@ app.delete("/:id", async (req, res) => {
     await UrlModel.findByIdAndDelete(req.params.id);
 
     //publish
+    await publishToQueue(
+      hashids.encodeHex(req.params.id.toString()),
+      "delete-url"
+    );
     res.status(200).json("Delete successful.");
   } catch (error) {
     throw error;

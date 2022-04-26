@@ -1,13 +1,6 @@
 module.exports = {
-  db_config: {
-    db:
-      process.env.NODE_ENV !== "production"
-        ? "mongodb://localhost:27017/managementservice"
-        : "",
-  },
   app_config: {
-    redirection_url:
-      process.env.NODE_ENV !== "production" ? "http://localhost:8001" : "",
+    app_url: process.env.NODE_ENV !== "production" ? "http://localhost:8001" : "",
   },
   rabbit_mq_config: {
     protocol: "amqp",
@@ -16,5 +9,9 @@ module.exports = {
     username: "guest",
     password: "guest",
     virtualHost: "/",
+  },
+  redis_config: {
+    port: process.env.REDIS_PORT || 6379,
+    host: process.env.REDIS_HOST || "",
   },
 };
